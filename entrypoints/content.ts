@@ -1,13 +1,14 @@
 import { createRoot } from "react-dom/client";
-import type { ContentScriptContext } from "wxt/client";
+import { ContentScriptContext } from "wxt/client";
 import { App } from "@/components/App";
 import React from "react";
 import "~/assets/tailwind.css";
 
 export default defineContentScript({
-  matches: ["*://*.linkedin.com/messaging/thread/*"],
+  matches: ["*://*.linkedin.com/*"],
   cssInjectionMode: "ui",
   async main(ctx) {
+    console.log("called");
     const ui = await createUi(ctx);
     ui.mount();
   },
@@ -15,7 +16,7 @@ export default defineContentScript({
 
 function createUi(ctx: ContentScriptContext) {
   return createShadowRootUi(ctx, {
-    name: "tailwind-shadow-root-example",
+    name: "writer-helper",
     position: "inline",
     anchor: "body",
     append: "first",

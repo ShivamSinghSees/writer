@@ -32,7 +32,6 @@ export const App: React.FC = () => {
     const target = event.target as HTMLElement;
     setTimeout(() => {
       if (target.getAttribute("role") === "textbox") {
-        console.log("heyyyy");
         setShowButton(false);
       }
     }, 100);

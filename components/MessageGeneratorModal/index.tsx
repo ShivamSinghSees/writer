@@ -1,24 +1,12 @@
-import React, { useState } from "react";
-import ArrowIcon from "~/assets/icons/arrow.svg";
-import RepeatIcon from "~/assets/icons/repeat.svg";
-import ArrowDownIcon from "~/assets/icons/arrow-down.svg";
-
-interface ModalProps {
-  onClose: () => void;
-  onInsert: (text: string) => void;
-}
-
-interface ChatResponse {
-  role: "user" | "assistant";
-  text: string;
-}
-
-const dummyResponse =
-  "Thank you for the opportunity! If you have any more questions or if there's anything else I can help you with, feel free to ask.";
+import { DUMMY_RESPONSE } from "@/utils/constants";
+import { ChatMessageType, ModalProps } from "@/utils/types";
+import { ChatMessage } from "../ChatMessage";
+import { ActionButton } from "../Buttons/ActionButton";
+import Arrow from "~/assets/icons/arrow.svg";
 
 export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
-  const [response, setResponse] = useState<ChatResponse[]>([]);
-  const [command, setCommand] = useState("");
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [prompt, setPrompt] = useState("");
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -26,64 +14,70 @@ export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
     }
   };
 
-  function handleGenerate() {
-    setResponse((prev) => {
-      return [...prev, { role: "user", text: command }];
-    });
+  const handleGenerate = () => {
+    if (!prompt.trim()) return;
+
+    setMessages((prev) => [...prev, { role: "user", text: prompt }]);
+    setPrompt("");
 
     // added a delay before showing response so looks authentic
     setTimeout(() => {
-      setResponse((prev) => {
-        return [...prev, { role: "assistant", text: dummyResponse }];
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: DUMMY_RESPONSE,
+        },
+      ]);
     }, 1000);
-  }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleGenerate();
+    }
+  };
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 test-modal "
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 test-modal"
       onClick={handleBackdropClick}
     >
-      <div className="bg-[#F9FAFB] rounded-lg p-[26px] w-[870px] max-w-[90vw] text-end flex gap-[26px] flex-col ">
-        {response && (
+      <div className="bg-[#F9FAFB] rounded-lg p-[26px] w-[870px] max-w-[90vw] text-end flex gap-[26px] flex-col">
+        {messages.length > 0 && (
           <div className="flex gap-[26px] flex-col">
-            {response?.map((chat) => {
-              return (
-                <span
-                  className={`text-[24px] p-[16px] rounded-[12px] w-fit text-[#666D80] ${chat.role === "assistant" ? "text-start bg-[#DBEAFE] " : "self-end bg-[#DFE1E7]"} `}
-                >
-                  {" "}
-                  {chat.text}
-                </span>
-              );
-            })}
+            {messages.map((message, index) => (
+              <ChatMessage
+                key={index}
+                role={message.role}
+                text={message.text}
+              />
+            ))}
           </div>
         )}
+
         <input
-          value={command}
-          onChange={(e) => setCommand(e.target.value)}
-          className="w-full h-[61px] border rounded-[8px] text-[24px] leading-[29px] px-[16px] py-[5px] text-[#666D80] "
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className="w-full h-[61px] border rounded-[8px] text-[24px] leading-[29px] px-[16px] py-[5px] text-[#666D80]"
           placeholder="Your prompt"
         />
-        {response.length ? (
-          <div className="flex gap-[26px] justify-end ">
-            <button
-              onClick={() => onInsert(dummyResponse)}
-              className=" flex w-fit gap-[12px] border border-[#666D80] text-[#666D80]  py-[12px] px-[24px] rounded-[15px] text-[24px] items-center"
-            >
-              <img src={ArrowDownIcon} alt="arrow" /> Insert
-            </button>
 
-            <button className="text-white flex w-fit gap-[16px] bg-[#3B82F6] py-[12px] px-[24px] rounded-[15px] text-[24px] cursor-default items-center ">
-              <img src={RepeatIcon} alt="repeat" /> Regenerate
-            </button>
-          </div>
+        {messages.length > 0 ? (
+          <ActionButton
+            onInsert={() => onInsert(DUMMY_RESPONSE)}
+            onRegenerate={handleGenerate}
+            showRegenerate
+          />
         ) : (
           <button
             onClick={handleGenerate}
-            className="text-white flex w-fit gap-[10px] bg-[#3B82F6] py-[12px] px-[24px] rounded-[15px] text-[24px] self-end items-center "
+            disabled={!prompt}
+            className="text-white flex w-fit gap-[10px] bg-[#3B82F6] py-[12px] px-[24px] rounded-[15px] text-[24px] self-end items-center"
           >
-            <img src={ArrowIcon} alt="generate" />
+            <img src={Arrow} alt="generate" />
             Generate
           </button>
         )}
@@ -91,3 +85,5 @@ export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
     </div>
   );
 };
+
+export default Modal;
