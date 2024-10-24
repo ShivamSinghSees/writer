@@ -20,7 +20,7 @@ export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
     setMessages((prev) => [...prev, { role: "user", text: prompt }]);
     setPrompt("");
 
-    // added a delay before showing response so looks authentic
+    // added a delay before showing response so it looks authentic
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -32,19 +32,12 @@ export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
     }, 1000);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleGenerate();
-    }
-  };
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 test-modal"
       onClick={handleBackdropClick}
     >
-      <div className="bg-[#F9FAFB] rounded-lg p-[26px] w-[870px] max-w-[90vw] text-end flex gap-[26px] flex-col">
+      <div className="bg-[#F9FAFB] p-[26px] w-[870px] max-w-[90vw] text-end flex gap-[26px] flex-col rounded-[15px] shadow-md">
         {messages.length > 0 && (
           <div className="flex gap-[26px] flex-col">
             {messages.map((message, index) => (
@@ -58,16 +51,21 @@ export const Modal: React.FC<ModalProps> = ({ onClose, onInsert }) => {
         )}
 
         <input
+          disabled={!!messages.length}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyPress={handleKeyPress}
           className="w-full h-[61px] border rounded-[8px] text-[24px] leading-[29px] px-[16px] py-[5px] text-[#666D80]"
           placeholder="Your prompt"
         />
 
         {messages.length > 0 ? (
           <ActionButton
-            onInsert={() => onInsert(DUMMY_RESPONSE)}
+            onInsert={() => {
+              // wait till the response is received
+              if (messages.length == 2) {
+                onInsert(DUMMY_RESPONSE);
+              }
+            }}
             onRegenerate={handleGenerate}
             showRegenerate
           />

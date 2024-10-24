@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { AIReplyButton } from "./AIReplyButton/index.tsx";
 import { Modal } from "./MessageGeneratorModal/index.tsx";
+import { useFocusHandler } from "@/hooks/useFocusHandler.tsx";
 
 export const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
-  const [showButton, setShowButton] = useState(false);
+  const { showButton, buttonPosition, activeInputRef } = useFocusHandler({
+    AiIconHeight,
+    AiIconWidth,
+  });
 
   function handleGeneratedTextInsertion(text: string) {
-    const input = document.querySelector('[role="textbox"]') as HTMLElement;
+    const input = activeInputRef.current;
 
     if (input) {
       const paragraph = input.querySelector("p");
@@ -27,40 +30,6 @@ export const App: React.FC = () => {
 
     setIsModalOpen(false);
   }
-
-  const handleInputBlur = (event: FocusEvent) => {
-    const target = event.target as HTMLElement;
-    setTimeout(() => {
-      if (target.getAttribute("role") === "textbox") {
-        setShowButton(false);
-      }
-    }, 100);
-  };
-
-  useEffect(() => {
-    const handleInputFocus = (event: FocusEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.getAttribute("role") === "textbox") {
-        const rect = target.getBoundingClientRect();
-        const topOffset = rect.height - 40;
-        const leftOffset = rect.width - 40;
-        setButtonPosition({
-          top: rect.top + topOffset,
-          left: rect.left + leftOffset,
-        });
-        setShowButton(true);
-      }
-    };
-
-    document.addEventListener("focusin", handleInputFocus);
-    document.addEventListener("focusout", handleInputBlur);
-
-    return () => {
-      document.removeEventListener("focusin", handleInputFocus);
-      document.removeEventListener("focusout", handleInputBlur);
-    };
-  }, []);
 
   return (
     <>

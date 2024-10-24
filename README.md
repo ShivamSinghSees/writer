@@ -1,3 +1,3 @@
-# WXT + React
+# Demo
 
-This template should help get you started developing with React in WXT.
+[Watch the Demo Video](https://www.youtube.com/watch?v=6QEbjW626WI)
